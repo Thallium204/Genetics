@@ -2,21 +2,24 @@ extends RigidBody2D
 
 var rng = RandomNumberGenerator.new()
 
-var thrust_time:float = 0.5
-var thrust_length:int = 100
-var thrust_sequence = PoolVector2Array()
+var thrust_time:float = 0.2
+var thrust_index:int = 0
+
+var genes = { 
+			"genetic_score":0.0,
+			"sex":0,
+			"first_name": "FIRST",
+			"family_name": "FAMILY",
+			"thrust_sequence":PoolVector2Array(),
+	}
 
 var delta_time:float = thrust_time
 
 
-func _ready():
-	
-	rng.randomize()
-	
-	for thrust in thrust_length:
-		var angle = rng.randf_range(0,360)
-		var thrust_vector = Vector2(sin(angle),cos(angle))
-		thrust_sequence.append(thrust_vector)
+func update_visuals(family_color):
+	$Name.text = genes.first_name + "\n" + genes.family_name
+	$SpriteInner.modulate = family_color
+	$SpriteQuad.modulate = Color.blue if genes.sex == 0 else Color.pink
 
 
 func _physics_process(delta):
@@ -31,30 +34,34 @@ func _physics_process(delta):
 
 func thrust():
 	
-	if thrust_sequence.empty():
-		queue_free()
-		return
+	if thrust_index == genes.thrust_sequence.size():
+		thrust_index = 0
 	
 	#print("thrust: ",thrust_sequence[0] )
 	
-	#apply_impulse(Vector2.ZERO,thrust_sequence[0] * 32)
-	applied_force = thrust_sequence[0] * 128
-	thrust_sequence.remove(0)
+	#apply_impulse(Vector2.ZERO,thrust_sequence[thrust_index] * 32)
+	applied_force = genes.thrust_sequence[thrust_index] * 128
+	thrust_index += 1
 	
 	update()
 
 
 func _draw():
 	
-	draw_line(Vector2.ZERO,applied_force.normalized() * 32,Color.red,5.0)
+	draw_line(Vector2.ZERO,-applied_force.normalized() * 32,Color.red,5.0)
 
 
 func _on_Rocket_body_entered(body):
 	
 	if "Goal" in body.name:
-		
-		queue_free()
+		position = body.position
+		die()
 
 
-func _on_Rocket_tree_exited():
-	get_parent().add_genes(thrust_sequence,position)
+func die():
+	get_parent().add_genes(genes,position)
+	queue_free()
+
+
+
+
