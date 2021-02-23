@@ -28,8 +28,15 @@ func _physics_process(delta):
 	
 	if delta_time >= thrust_time:
 		delta_time -= thrust_time
-		
+		update_genetic_score()
 		thrust()
+
+
+func update_genetic_score():
+	var new_genetic_score = get_parent().get_genetic_score(position)
+	if new_genetic_score > genes.genetic_score:
+		genes.genetic_score = new_genetic_score
+	$Score.text = str(stepify(genes.genetic_score,0.01))
 
 
 func thrust():
@@ -47,7 +54,7 @@ func thrust():
 
 
 func _draw():
-	
+	return
 	draw_line(Vector2.ZERO,-applied_force.normalized() * 32,Color.red,5.0)
 
 
@@ -59,7 +66,8 @@ func _on_Rocket_body_entered(body):
 
 
 func die():
-	get_parent().add_genes(genes,position)
+	update_genetic_score()
+	get_parent().add_to_gene_pool(genes.duplicate(true))
 	queue_free()
 
 

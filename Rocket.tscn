@@ -1,10 +1,14 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://rocket.gd" type="Script" id=1]
 [ext_resource path="res://assets/circle.svg" type="Texture" id=2]
 [ext_resource path="res://assets/quad.svg" type="Texture" id=3]
 
-[sub_resource type="CircleShape2D" id=1]
+[sub_resource type="PhysicsMaterial" id=1]
+friction = 0.0
+bounce = 0.1
+
+[sub_resource type="CircleShape2D" id=2]
 radius = 16.0
 
 [node name="Rocket" type="RigidBody2D" groups=[
@@ -12,6 +16,7 @@ radius = 16.0
 ]]
 collision_layer = 2
 mode = 2
+physics_material_override = SubResource( 1 )
 contacts_reported = 1
 contact_monitor = true
 script = ExtResource( 1 )
@@ -32,14 +37,28 @@ texture = ExtResource( 2 )
 texture = ExtResource( 3 )
 
 [node name="Shape" type="CollisionShape2D" parent="."]
-shape = SubResource( 1 )
+shape = SubResource( 2 )
 
 [node name="Name" type="Label" parent="."]
+visible = false
 margin_left = -40.0
 margin_top = -20.0
 margin_right = 40.0
 margin_bottom = 20.0
 text = "Grice"
+align = 1
+valign = 1
+clip_text = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Score" type="Label" parent="."]
+margin_left = -40.0
+margin_top = -20.0
+margin_right = 40.0
+margin_bottom = 20.0
+text = "0.0"
 align = 1
 valign = 1
 clip_text = true
