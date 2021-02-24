@@ -3,21 +3,20 @@ extends TileMap
 signal begin_simulation
 signal rockets_spawned
 signal end_simulation
+signal toggle_debug(state)
 
 var rng = RandomNumberGenerator.new()
 var rocket_load = preload("res://Rocket.tscn")
 
 enum Sex{MALE,FEMALE}
 
-const ROCKETS: = 64
+const ROCKETS: = 128
 
-const POOL_MAX: = 25 # Maximum number of gene copies added
-const POOL_MIN: = 1 # Minimum number of gene copies added
 const MUTATION_CHANCE = 0.05
 const MUTATION_ANGLE = 0.01
 
 const thrust_length:int = 50
-const SIMUL_TIME:float = 16.0
+var SIMUL_TIME:float = 10.0
 var simul_time:float = 0.0 # seconds
 
 onready var WORLD_BORDERS = get_tree().get_root().size
@@ -26,16 +25,24 @@ var family_names = []
 var male_names = []
 var female_names = []
 
+var debug:bool = false setget set_debug
 var goal_positions:PoolVector2Array
 var gene_pool = {"fathers":[],"mothers":[]}
 var family_colors = {}
+
+
+func set_debug(new_value):
+	debug = new_value
+
 
 func _ready():
 	rng.randomize()
 	import_names()
 	fill_floor()
 	get_parent().update_path()
+	get_parent().get_node("UI/HBoxContainer/Time").value = SIMUL_TIME
 	randomize_gene_pool()
+	connect("toggle_debug",self,"set_debug")
 	connect("begin_simulation",self,"spawn_rockets")
 	connect("rockets_spawned",get_parent().get_node("UI"),"display_info")
 	emit_signal("begin_simulation")
@@ -111,17 +118,20 @@ func add_to_gene_pool(genes):
 		sex_pool = gene_pool.mothers
 	
 	if sex_pool.empty():
-		sex_pool.append(genes)
+		sex_pool.append(genes.duplicate(true))
 		return
 	
 	for genes_index in sex_pool.size():
 		var other_genes = sex_pool[genes_index]
 		if genes.genetic_score > other_genes.genetic_score:
-			sex_pool.insert(genes_index,genes)
+			sex_pool.insert(genes_index,genes.duplicate(true))
+			if genes.sex == Sex.MALE: # insert two gene copies for fathers
+				sex_pool.insert(genes_index,genes.duplicate(true))
 			return
 	
 	sex_pool.append(genes)
 
+var draw_positions = []
 
 func get_genetic_score(rocket_position):
 	
@@ -137,12 +147,12 @@ func get_genetic_score(rocket_position):
 	var timing_score = 1 - simul_time / SIMUL_TIME
 	# genetic_score: 1 ~ best | 0 ~ worst
 	var genetic_score = (pow(2,closeness_score) - 1 + pow(2,timing_score) - 1) / 2.0
-	print(closeness_score," ",timing_score," ",genetic_score)
-	return genetic_score
+	#print(closeness_score," ",timing_score," ",genetic_score)
+	return 3 * closeness_score + timing_score - 1
 
 
 func spawn_rockets():
-	print(get_tree().get_nodes_in_group("rocket").size())
+	
 	#print_gene_pool(gene_pool)
 	#print("\n")
 	var relationships = min(gene_pool.mothers.size(),gene_pool.fathers.size())
@@ -154,10 +164,15 @@ func spawn_rockets():
 			var rocket = rocket_load.instance()
 			rocket.position = $Spawn.position
 			connect("end_simulation",rocket,"die")
+			connect("toggle_debug",rocket,"set_debug")
 			rocket.genes = genes
+			rocket.debug = debug
 			rocket.update_visuals(family_colors[genes.family_name])
 			rocket.thrust_time = SIMUL_TIME / float(thrust_length)
 			add_child(rocket)
+	
+		if get_tree().get_nodes_in_group("rocket").size() >= ROCKETS:
+			break
 	
 	var new_rockets_needed = ROCKETS - get_tree().get_nodes_in_group("rocket").size()
 	#print("extra rockets = ",new_rockets_needed)
@@ -214,6 +229,7 @@ func get_parents_genes():
 				gene_pool.fathers.erase(pot_father_genes)
 				gene_pool.mothers.erase(pot_mother_genes)
 				return [pot_father_genes,pot_mother_genes]
+	return [{},{}]
 
 
 func create_child_from_parents(father_genes,mother_genes,prefered_sex=-1):
@@ -310,11 +326,18 @@ func print_gene_pool(gene_pool):
 
 func _physics_process(delta):
 	
-	simul_time += delta
 	if simul_time >= SIMUL_TIME:
 		emit_signal("end_simulation")
 		if get_tree().get_nodes_in_group("rocket").empty():
 			simul_time -= SIMUL_TIME
 			emit_signal("begin_simulation")
+	else:
+		simul_time += delta
+		get_parent().get_node("UI/HBoxContainer/Time/ProgressBar").value = simul_time
+
+
+func _on_Time_value_changed(value):
+	SIMUL_TIME = value
+
 
 
