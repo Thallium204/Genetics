@@ -31,7 +31,7 @@ func display_info():
 			if pop_info.pop == pop:
 				var name_label = Label.new()
 				if family_name in last_family_names:
-					name_label.modulate = Color.red
+					name_label.modulate = get_parent().get_node("Map").family_colors[family_name]
 				name_label.text = family_name
 				$VBox/GridContainer.add_child(name_label)
 				var pop_label = Label.new()
