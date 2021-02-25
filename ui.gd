@@ -1,6 +1,7 @@
 extends Control
 
 var last_family_names = []
+var family_populations = {}
 
 var family_to_labels = {} # "HENDRICK" : {"name":Label, "pop":Label, ...}
 
@@ -10,18 +11,15 @@ func display_info():
 		label.free()
 	
 	var rocket_array = get_tree().get_nodes_in_group("rocket")
-	var family_populations = {}
+	family_populations = {}
 	
 	var largest_pop = 0
 	for rocket in rocket_array:
 		var family_name = rocket.genes.family_name
 		if family_populations.has(family_name):
 			family_populations[family_name].pop += 1
-			var pop = family_populations[family_name].pop
-			family_populations[family_name].score *= (pop - 1)/pop
-			family_populations[family_name].score += rocket.genes.genetic_score/pop
 		else:
-			family_populations[family_name] = {"pop":1,"score":rocket.genes.genetic_score}
+			family_populations[family_name] = {"pop":1,"reported":0,"score":rocket.genes.score}
 		if family_populations[family_name].pop > largest_pop:
 			largest_pop = family_populations[family_name].pop
 	
@@ -50,5 +48,14 @@ func display_info():
 	for family_name in family_populations:
 		last_family_names.append(family_name)
 
+
 func update_labels(genes):
-	family_to_labels[genes.family_name].score.text = str(stepify(genes.genetic_score,0.01))
+	var family_data = family_populations[genes.family_name]
+	if family_data.pop == family_data.reported:
+		family_data.reported = 1
+		family_data.score = genes.score
+	else:
+		family_data.reported += 1
+		family_data.score *= (family_data.reported - 1)/family_data.reported
+		family_data.score += genes.score/family_data.reported
+	family_to_labels[genes.family_name].score.text = str(stepify(family_data.score,0.01))

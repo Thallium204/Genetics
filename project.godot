@@ -8,9 +8,14 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "Resource",
+"class": "Genes",
+"language": "GDScript",
+"path": "res://Genes.gd"
+} ]
 _global_script_class_icons={
-
+"Genes": "res://icons/Genes.svg"
 }
 
 [application]
@@ -19,9 +24,15 @@ config/name="Genetics"
 run/main_scene="res://Main.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+Lineage="*res://Lineage.gd"
+Genetics="*res://Genetics.gd"
+
 [display]
 
-window/size/height=608
+window/size/width=1234
+window/size/height=822
 window/stretch/mode="2d"
 window/stretch/aspect="keep"
 
