@@ -6,13 +6,7 @@ var thrust_time:float = 0.2
 var thrust_index:int = 0
 var debug:bool = false setget set_debug
 
-var genes = { 
-			"genetic_score":0.0,
-			"sex":0,
-			"first_name": "FIRST",
-			"family_name": "FAMILY",
-			"thrust_sequence":PoolVector2Array(),
-	}
+var genes:Genes
 
 var delta_time:float = thrust_time
 var nearest_path_point:Vector2
@@ -22,9 +16,9 @@ func set_debug(new_value):
 	update()
 
 
-func update_visuals(family_color):
+func update_visuals():
 	$Name.text = genes.first_name + "\n" + genes.family_name
-	$SpriteInner.modulate = family_color
+	$SpriteInner.modulate = Lineage.get_family_colors(genes.family_name)
 	$SpriteQuad.modulate = Color.blue if genes.sex == 0 else Color.pink
 
 
@@ -44,11 +38,11 @@ func _physics_process(delta):
 
 func update_genetic_score():
 	var new_genetic_score = get_parent().get_genetic_score(position)
-	if new_genetic_score > genes.genetic_score:
-		genes.genetic_score = new_genetic_score
+	if new_genetic_score > genes.score:
+		genes.score = new_genetic_score
 	$Score.visible = debug
 	$Name.visible = debug
-	$Score.text = str(stepify(genes.genetic_score,0.01))
+	$Score.text = str(stepify(genes.score,0.01))
 	get_parent().get_parent().get_node("UI").update_labels(genes)
 
 
