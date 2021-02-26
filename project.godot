@@ -26,8 +26,8 @@ config/icon="res://icon.png"
 
 [autoload]
 
-Lineage="*res://Lineage.gd"
-Genetics="*res://Genetics.gd"
+Lineage="*res://_Lineage.gd"
+Genetics="*res://_Genetics.gd"
 
 [display]
 
@@ -44,7 +44,6 @@ window/stretch/aspect="keep"
 [physics]
 
 2d/physics_engine="GodotPhysics"
-2d/default_gravity=0
 2d/default_gravity_vector=Vector2( 0, 0 )
 
 [rendering]

@@ -9,7 +9,7 @@ var score:float = 0.0
 
 func _init(parents_genes = [], prefered_sex = -1):
 	
-	sex = round(rand_range(0,1)) if prefered_sex < 0 else prefered_sex
+	sex = Genetics.get_random_sex() if prefered_sex < 0 else prefered_sex
 	first_name = Lineage.get_random_first_name(sex)
 	
 	if parents_genes.empty():
