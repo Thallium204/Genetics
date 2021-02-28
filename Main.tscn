@@ -68,10 +68,10 @@ __meta__ = {
 }
 
 [node name="Goal" parent="Map" instance=ExtResource( 2 )]
-position = Vector2( 96, 96 )
+position = Vector2( 64, 64 )
 
 [node name="Spawn" type="Node2D" parent="Map"]
-position = Vector2( 864, 704 )
+position = Vector2( 896, 736 )
 __meta__ = {
 "_edit_group_": true
 }

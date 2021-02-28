@@ -27,6 +27,8 @@ func _init(parents_genes = [], prefered_sex = -1):
 		for index in Genetics.THRUSTS:
 			var new_thrust = (father_genes.thrust_sequence[index] + mother_genes.thrust_sequence[index]).normalized()
 			thrust_sequence.append(new_thrust)
+	
+	mutate()
 
 
 func mutate():
@@ -41,3 +43,4 @@ func mutate():
 func get_random_vector():
 	var angle = rand_range(0.0,360.0)
 	return Vector2(sin(angle),cos(angle))
+

@@ -19,7 +19,7 @@ func display_info():
 		if family_populations.has(family_name):
 			family_populations[family_name].pop += 1
 		else:
-			family_populations[family_name] = {"pop":1,"reported":0,"score":rocket.genes.score}
+			family_populations[family_name] = {"pop":1,"reported":0,"max_score":rocket.genes.score}
 		if family_populations[family_name].pop > largest_pop:
 			largest_pop = family_populations[family_name].pop
 	
@@ -36,12 +36,12 @@ func display_info():
 				pop_label.text = str(pop_info.pop)
 				$VBox/GridContainer.add_child(pop_label)
 				var score_label = Label.new()
-				score_label.text = str(pop_info.score)
+				score_label.text = str(pop_info.max_score)
 				$VBox/GridContainer.add_child(score_label)
 				family_to_labels[family_name] = {
 					"family_name":name_label,
 					"pop":pop_label,
-					"score":score_label,
+					"max_score":score_label,
 					}
 	
 	last_family_names = []
@@ -49,13 +49,9 @@ func display_info():
 		last_family_names.append(family_name)
 
 
-func update_labels(genes):
+func update_labels(genes:Genes):
 	var family_data = family_populations[genes.family_name]
-	if family_data.pop == family_data.reported:
-		family_data.reported = 1
-		family_data.score = genes.score
-	else:
-		family_data.reported += 1
-		family_data.score *= (family_data.reported - 1)/family_data.reported
-		family_data.score += genes.score/family_data.reported
-	family_to_labels[genes.family_name].score.text = str(stepify(family_data.score,0.01))
+	if genes.score > family_data.max_score:
+		family_data.max_score = genes.score
+		var label_node = family_to_labels[genes.family_name].max_score
+		label_node.text = str(stepify(family_data.max_score,0.01))

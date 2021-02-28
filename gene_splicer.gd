@@ -1,7 +1,7 @@
 extends TileMap
 
 signal begin_simulation
-signal rockets_spawned
+signal generation_spawned
 signal end_simulation
 signal toggle_debug(state)
 
@@ -9,8 +9,6 @@ var rng = RandomNumberGenerator.new()
 var rocket_load = preload("res://Rocket.tscn")
 
 enum Sex{MALE,FEMALE}
-
-const ROCKETS: = 128
 
 var SIMUL_TIME:float = 10.0
 var simul_time:float = 0.0 # seconds
@@ -33,8 +31,8 @@ func _ready():
 	get_parent().get_node("UI/HBoxContainer/Time").value = SIMUL_TIME
 	randomize_gene_pool()
 	connect("toggle_debug",self,"set_debug")
-	connect("begin_simulation",self,"spawn_rockets")
-	connect("rockets_spawned",get_parent().get_node("UI"),"display_info")
+	connect("begin_simulation",self,"spawn_rocket_generation")
+	connect("generation_spawned",get_parent().get_node("UI"),"display_info")
 	emit_signal("begin_simulation")
 
 
@@ -64,9 +62,9 @@ func fill_floor():
 
 
 func randomize_gene_pool():
-	for gene in ROCKETS/2:
+	for gene in Genetics.ROCKETS/2:
 		add_to_gene_pool(create_child_from_random(Sex.MALE))
-	for gene in ROCKETS/2:
+	for gene in Genetics.ROCKETS/2:
 		add_to_gene_pool(create_child_from_random(Sex.FEMALE))
 
 
@@ -83,13 +81,13 @@ func add_to_gene_pool(genes:Genes):
 		sex_pool = gene_pool.mothers
 	
 	if sex_pool.empty():
-		sex_pool.append(genes.duplicate(true))
+		sex_pool.append(genes)
 		return
 	
 	for genes_index in sex_pool.size():
 		var other_genes = sex_pool[genes_index]
 		if genes.score > other_genes.score:
-			sex_pool.insert(genes_index,genes.duplicate(true))
+			sex_pool.insert(genes_index,genes)
 			return
 	
 	sex_pool.append(genes)
@@ -114,45 +112,40 @@ func get_genetic_score(rocket_position):
 	return 3 * closeness_score + timing_score - 1
 
 
-func spawn_rockets():
+func spawn_rocket_generation():
 	
-	#print_gene_pool(gene_pool)
+	print_gene_pool(gene_pool)
 	#print("\n")
 	var relationships = min(gene_pool.mothers.size(),gene_pool.fathers.size())
 	for relation_id in relationships:
 		
 		var childrens_genes = get_childrens_genes()
 		for genes in childrens_genes:
+			spawn_rocket(genes)
 		
-			var rocket = rocket_load.instance()
-			rocket.position = $Spawn.position
-			connect("end_simulation",rocket,"die")
-			connect("toggle_debug",rocket,"set_debug")
-			rocket.genes = genes
-			rocket.debug = debug
-			rocket.update_visuals()
-			rocket.thrust_time = SIMUL_TIME / float(Genetics.THRUSTS)
-			add_child(rocket)
-	
-		if get_tree().get_nodes_in_group("rocket").size() >= ROCKETS:
+		if get_tree().get_nodes_in_group("rocket").size() >= Genetics.ROCKETS:
 			break
 	
-	var new_rockets_needed = ROCKETS - get_tree().get_nodes_in_group("rocket").size()
-	#print("extra rockets = ",new_rockets_needed)
+	var new_rockets_needed = Genetics.ROCKETS - get_tree().get_nodes_in_group("rocket").size()
 	for new_rocket_id in max(0,new_rockets_needed):
-		
-		var rocket = rocket_load.instance()
-		rocket.position = $Spawn.position
-		connect("end_simulation",rocket,"die")
-		rocket.genes = create_child_from_random()
-		rocket.update_visuals()
-		rocket.thrust_time = SIMUL_TIME / float(Genetics.THRUSTS)
-		add_child(rocket)
+		spawn_rocket(create_child_from_random())
 	
 	gene_pool.fathers = []
 	gene_pool.mothers = []
 	
-	emit_signal("rockets_spawned")
+	emit_signal("generation_spawned")
+
+
+func spawn_rocket(genes:Genes):
+	var rocket = rocket_load.instance()
+	rocket.position = $Spawn.position
+	connect("end_simulation",rocket,"die")
+	connect("toggle_debug",rocket,"set_debug")
+	rocket.genes = genes
+	rocket.debug = debug
+	rocket.update_visuals()
+	rocket.thrust_time = SIMUL_TIME / float(Genetics.THRUSTS)
+	add_child(rocket)
 
 
 func get_childrens_genes():
@@ -211,13 +204,11 @@ func print_gene_pool(gene_pool):
 	print("\n\n")
 	print("FATHERS")
 	for genes in gene_pool.fathers:
-		print("  name = ",genes.first_name + " " + genes.family_name)
-		print("  score = ",genes.genetic_score)
+		print(genes.first_name + " " + genes.family_name,": ",genes.score)
 	print()
 	print("MOTHERS")
 	for genes in gene_pool.mothers:
-		print("  name = ",genes.first_name + " " + genes.family_name)
-		print("  score = ",genes.genetic_score)
+		print(genes.first_name + " " + genes.family_name,": ",genes.score)
 
 
 func _physics_process(delta):

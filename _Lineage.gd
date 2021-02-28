@@ -41,10 +41,10 @@ func randomize_name_orders():
 
 func get_random_first_name(sex):
 	if sex == Genetics.MALE:
-		male_index += 1
+		male_index = (male_index + 1) % male_names.size()
 		return male_names[male_index]
 	else:
-		female_index += 1
+		female_index = (female_index + 1) % female_names.size()
 		return female_names[female_index]
 
 
