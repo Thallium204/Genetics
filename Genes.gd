@@ -20,9 +20,19 @@ func _init(parents_genes = [], prefered_sex = -1):
 		
 	else:
 		
-		var father_genes = parents_genes[0]
-		var mother_genes = parents_genes[1]
-		family_name = father_genes.family_name
+		var father_genes:Genes = parents_genes[0]
+		var mother_genes:Genes = parents_genes[1]
+		
+		match Genetics.family_mode:
+			Genetics.FAMILY_FATHER:
+				family_name = father_genes.family_name
+			Genetics.FAMILY_MOTHER:
+				family_name = mother_genes.family_name
+			Genetics.FAMILY_SCORE:
+				if father_genes.score >= mother_genes.score:
+					family_name = father_genes.family_name
+				else:
+					family_name = mother_genes.family_name
 		
 		for index in Genetics.THRUSTS:
 			var new_thrust = (father_genes.thrust_sequence[index] + mother_genes.thrust_sequence[index]).normalized()

@@ -55,3 +55,11 @@ func update_labels(genes:Genes):
 		family_data.max_score = genes.score
 		var label_node = family_to_labels[genes.family_name].max_score
 		label_node.text = str(stepify(family_data.max_score,0.01))
+
+
+func _on_Wives_value_changed(value):
+	Genetics.wives = value
+
+
+func _on_Husbands_value_changed(value):
+	Genetics.husbands = value

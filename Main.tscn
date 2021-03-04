@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://navigation.gd" type="Script" id=1]
 [ext_resource path="res://Goal.tscn" type="PackedScene" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://assets/floor.svg" type="Texture" id=5]
 [ext_resource path="res://theme.tres" type="Theme" id=6]
 [ext_resource path="res://ui.gd" type="Script" id=7]
+[ext_resource path="res://FamilyModeOptions.gd" type="Script" id=8]
 
 [sub_resource type="ConvexPolygonShape2D" id=1]
 points = PoolVector2Array( 32, 32, 0, 32, 0, 0, 32, 0 )
@@ -119,14 +120,17 @@ columns = 3
 anchor_top = 1.0
 anchor_right = 0.78
 anchor_bottom = 1.0
-margin_top = -35.0
+margin_left = 6.0
+margin_top = -50.0
+margin_right = -12.52
+margin_bottom = -6.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Debug" type="CheckButton" parent="UI/HBoxContainer"]
 margin_right = 135.0
-margin_bottom = 40.0
+margin_bottom = 44.0
 text = "Debug"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -135,20 +139,20 @@ __meta__ = {
 [node name="VSeparator" type="VSeparator" parent="UI/HBoxContainer"]
 margin_left = 139.0
 margin_right = 143.0
-margin_bottom = 40.0
+margin_bottom = 44.0
 
 [node name="Label" type="Label" parent="UI/HBoxContainer"]
 margin_left = 147.0
-margin_top = 12.0
+margin_top = 14.0
 margin_right = 276.0
-margin_bottom = 28.0
+margin_bottom = 30.0
 rect_min_size = Vector2( 50, 0 )
 text = "SIMUL_TIME: "
 
 [node name="Time" type="HSlider" parent="UI/HBoxContainer"]
 margin_left = 280.0
-margin_right = 962.0
-margin_bottom = 40.0
+margin_right = 384.0
+margin_bottom = 44.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 max_value = 60.0
@@ -174,5 +178,49 @@ percent_visible = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="VSeparator2" type="VSeparator" parent="UI/HBoxContainer"]
+margin_left = 388.0
+margin_right = 392.0
+margin_bottom = 44.0
+
+[node name="Label2" type="Label" parent="UI/HBoxContainer"]
+margin_left = 396.0
+margin_top = 14.0
+margin_right = 527.0
+margin_bottom = 30.0
+rect_min_size = Vector2( 50, 0 )
+text = "FAMILY_MODE:"
+
+[node name="FamilyModeOptions" type="OptionButton" parent="UI/HBoxContainer"]
+margin_left = 531.0
+margin_right = 636.0
+margin_bottom = 44.0
+size_flags_horizontal = 3
+script = ExtResource( 8 )
+
+[node name="VSeparator3" type="VSeparator" parent="UI/HBoxContainer"]
+margin_left = 640.0
+margin_right = 644.0
+margin_bottom = 44.0
+
+[node name="Wives" type="SpinBox" parent="UI/HBoxContainer"]
+margin_left = 648.0
+margin_right = 794.0
+margin_bottom = 44.0
+size_flags_horizontal = 3
+align = 1
+suffix = "wives"
+
+[node name="Husbands" type="SpinBox" parent="UI/HBoxContainer"]
+margin_left = 798.0
+margin_right = 944.0
+margin_bottom = 44.0
+size_flags_horizontal = 3
+align = 1
+suffix = "husbands"
 [connection signal="toggled" from="UI/HBoxContainer/Debug" to="." method="_on_Debug_toggled"]
 [connection signal="value_changed" from="UI/HBoxContainer/Time" to="Map" method="_on_Time_value_changed"]
+[connection signal="item_selected" from="UI/HBoxContainer/FamilyModeOptions" to="UI/HBoxContainer/FamilyModeOptions" method="_on_FamilyModeOptions_item_selected"]
+[connection signal="value_changed" from="UI/HBoxContainer/Wives" to="UI" method="_on_Wives_value_changed"]
+[connection signal="value_changed" from="UI/HBoxContainer/Husbands" to="UI" method="_on_Husbands_value_changed"]

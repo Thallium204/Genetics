@@ -87,10 +87,20 @@ func add_to_gene_pool(genes:Genes):
 	for genes_index in sex_pool.size():
 		var other_genes = sex_pool[genes_index]
 		if genes.score > other_genes.score:
-			sex_pool.insert(genes_index,genes)
+			if genes.sex == Sex.MALE:
+				for copy in Genetics.wives:
+					sex_pool.insert(genes_index,genes)
+			else:
+				for copy in Genetics.husbands:
+					sex_pool.insert(genes_index,genes)
 			return
 	
-	sex_pool.append(genes)
+	if genes.sex == Sex.MALE:
+		for copy in Genetics.wives:
+			sex_pool.append(genes)
+	else:
+		for copy in Genetics.husbands:
+			sex_pool.append(genes)
 
 var draw_positions = []
 
