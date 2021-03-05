@@ -194,27 +194,27 @@ text = "FAMILY_MODE:"
 
 [node name="FamilyModeOptions" type="OptionButton" parent="UI/HBoxContainer"]
 margin_left = 531.0
-margin_right = 636.0
+margin_right = 635.0
 margin_bottom = 44.0
 size_flags_horizontal = 3
 script = ExtResource( 8 )
 
 [node name="VSeparator3" type="VSeparator" parent="UI/HBoxContainer"]
-margin_left = 640.0
-margin_right = 644.0
+margin_left = 639.0
+margin_right = 643.0
 margin_bottom = 44.0
 
 [node name="Wives" type="SpinBox" parent="UI/HBoxContainer"]
-margin_left = 648.0
-margin_right = 794.0
+margin_left = 647.0
+margin_right = 793.0
 margin_bottom = 44.0
 size_flags_horizontal = 3
 align = 1
 suffix = "wives"
 
 [node name="Husbands" type="SpinBox" parent="UI/HBoxContainer"]
-margin_left = 798.0
-margin_right = 944.0
+margin_left = 797.0
+margin_right = 943.0
 margin_bottom = 44.0
 size_flags_horizontal = 3
 align = 1
