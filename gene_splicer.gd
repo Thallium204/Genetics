@@ -10,8 +10,7 @@ var rocket_load = preload("res://Rocket.tscn")
 
 enum Sex{MALE,FEMALE}
 
-var SIMUL_TIME:float = 10.0
-var simul_time:float = 0.0 # seconds
+var simul_time:float = Genetics.SIMUL_TIME # seconds
 
 onready var WORLD_BORDERS = get_tree().get_root().size
 
@@ -25,15 +24,13 @@ func set_debug(new_value):
 
 
 func _ready():
+	var _err
 	rng.randomize()
 	fill_floor()
 	get_parent().update_path()
-	get_parent().get_node("UI/HBoxContainer/Time").value = SIMUL_TIME
-	randomize_gene_pool()
-	connect("toggle_debug",self,"set_debug")
-	connect("begin_simulation",self,"spawn_rocket_generation")
-	connect("generation_spawned",get_parent().get_node("UI"),"display_info")
-	emit_signal("begin_simulation")
+	_err = connect("toggle_debug",self,"set_debug")
+	_err = connect("begin_simulation",self,"spawn_rocket_generation")
+	_err = connect("generation_spawned",get_parent().get_node("UI"),"display_info")
 
 
 func fill_floor():
@@ -62,9 +59,9 @@ func fill_floor():
 
 
 func randomize_gene_pool():
-	for gene in Genetics.ROCKETS/2:
+	for gene in int(Genetics.ROCKETS/2.0):
 		add_to_gene_pool(create_child_from_random(Sex.MALE))
-	for gene in Genetics.ROCKETS/2:
+	for gene in int(Genetics.ROCKETS/2.0):
 		add_to_gene_pool(create_child_from_random(Sex.FEMALE))
 
 
@@ -113,9 +110,9 @@ func get_genetic_score(rocket_position):
 	# closeness_score: 1 ~ on target | 0 ~ too far away
 	var closeness_score = get_parent().get_closest_point(rocket_position)
 	# timing_score: 1 ~ instant goal | 0 ~ didn't make it
-	var timing_score = 1 - simul_time / SIMUL_TIME
+	var timing_score = 1 - simul_time / Genetics.SIMUL_TIME
 	# genetic_score: 1 ~ best | 0 ~ worst
-	var genetic_score = (pow(2,closeness_score) - 1 + pow(2,timing_score) - 1) / 2.0
+	var _genetic_score = (pow(2,closeness_score) - 1 + pow(2,timing_score) - 1) / 2.0
 	#print(closeness_score," ",timing_score," ",genetic_score)
 	return 3 * closeness_score + timing_score - 1
 
@@ -145,14 +142,15 @@ func spawn_rocket_generation():
 
 
 func spawn_rocket(genes:Genes):
+	var _err
 	var rocket = rocket_load.instance()
 	rocket.position = $Spawn.position
-	connect("end_simulation",rocket,"die")
-	connect("toggle_debug",rocket,"set_debug")
+	_err = connect("end_simulation",rocket,"die")
+	_err = connect("toggle_debug",rocket,"set_debug")
 	rocket.genes = genes
 	rocket.debug = debug
 	rocket.update_visuals()
-	rocket.thrust_time = SIMUL_TIME / float(Genetics.THRUSTS)
+	rocket.thrust_time = Genetics.SIMUL_TIME / float(Genetics.THRUSTS)
 	add_child(rocket)
 
 
@@ -167,14 +165,14 @@ func get_childrens_genes():
 	#print(father_genes.first_name," ",father_genes.family_name," + ",
 	#mother_genes.first_name," ",mother_genes.family_name," = ")
 	
-	var has_male_heir = false
+	var _has_male_heir = false
 	var childrens_genes = []
 	var children_to_birth = round(rng.randfn(2.1,0.3))
 	for child_index in children_to_birth:
 		var child_genes = Genes.new([father_genes,mother_genes])
 		#print("   ",child_genes.first_name," ",child_genes.family_name)
 		if child_genes.sex == Sex.MALE:
-			has_male_heir = true
+			_has_male_heir = true
 		childrens_genes.append(child_genes)
 	
 #	if not has_male_heir:
@@ -208,31 +206,31 @@ func get_random_entry(array:Array,remove:bool = false):
 	return value
 
 
-func print_gene_pool(gene_pool):
+func print_gene_pool(print_gene_pool):
 	print("\n\n")
 	print("FATHERS")
-	for genes in gene_pool.fathers:
+	for genes in print_gene_pool.fathers:
 		print(genes.first_name + " " + genes.family_name,": ",genes.score)
 	print()
 	print("MOTHERS")
-	for genes in gene_pool.mothers:
+	for genes in print_gene_pool.mothers:
 		print(genes.first_name + " " + genes.family_name,": ",genes.score)
 
 
 func _physics_process(delta):
 	
-	if simul_time >= SIMUL_TIME:
+	if simul_time >= Genetics.SIMUL_TIME:
 		emit_signal("end_simulation")
 		if get_tree().get_nodes_in_group("rocket").empty():
-			simul_time -= SIMUL_TIME
+			simul_time -= Genetics.SIMUL_TIME
 			emit_signal("begin_simulation")
 	else:
 		simul_time += delta
-		get_parent().get_node("UI/HBoxContainer/Time/ProgressBar").value = simul_time
+		get_node("../UI").time_slider.get_node("SimulTime").value = simul_time
 
 
 func _on_Time_value_changed(value):
-	SIMUL_TIME = value
+	Genetics.SIMUL_TIME = value
 
 
 

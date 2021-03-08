@@ -1,13 +1,29 @@
 extends Control
 
+export(NodePath) var family_stats_vbox_path
+export(NodePath) var time_slider_path
+export(NodePath) var wives_spin_box_path
+export(NodePath) var husbands_spin_box_path
+
 var last_family_names = []
 var family_populations = {}
 
 var family_to_labels = {} # "HENDRICK" : {"name":Label, "pop":Label, ...}
 
+onready var family_stats_vbox = get_node(family_stats_vbox_path)
+onready var time_slider = get_node(time_slider_path)
+onready var wives_spin_box = get_node(wives_spin_box_path)
+onready var husbands_spin_box = get_node(husbands_spin_box_path)
+
+
+func _ready():
+	time_slider.value = Genetics.SIMUL_TIME
+	wives_spin_box.value = Genetics.wives
+	husbands_spin_box.value = Genetics.husbands
+
 func display_info():
 	
-	for label in $VBox/GridContainer.get_children():
+	for label in family_stats_vbox.get_children():
 		label.free()
 	
 	var rocket_array = get_tree().get_nodes_in_group("rocket")
@@ -31,13 +47,13 @@ func display_info():
 				if family_name in last_family_names:
 					name_label.modulate = Lineage.get_family_colors(family_name)
 				name_label.text = family_name
-				$VBox/GridContainer.add_child(name_label)
+				family_stats_vbox.add_child(name_label)
 				var pop_label = Label.new()
 				pop_label.text = str(pop_info.pop)
-				$VBox/GridContainer.add_child(pop_label)
+				family_stats_vbox.add_child(pop_label)
 				var score_label = Label.new()
 				score_label.text = str(pop_info.max_score)
-				$VBox/GridContainer.add_child(score_label)
+				family_stats_vbox.add_child(score_label)
 				family_to_labels[family_name] = {
 					"family_name":name_label,
 					"pop":pop_label,
@@ -63,3 +79,11 @@ func _on_Wives_value_changed(value):
 
 func _on_Husbands_value_changed(value):
 	Genetics.husbands = value
+
+
+func _on_Button_toggled(button_pressed):
+	var to_margin = -$BottomBar/Options.rect_size.y
+	to_margin *= int(button_pressed)
+	$Tween.interpolate_property($BottomBar,"margin_top",
+	null,to_margin,0.1,Tween.TRANS_LINEAR,Tween.EASE_IN)
+	$Tween.start()

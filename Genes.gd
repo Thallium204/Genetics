@@ -44,8 +44,6 @@ func _init(parents_genes = [], prefered_sex = -1):
 func mutate():
 	for index in thrust_sequence.size(): # mutate genes
 		if rand_range(0,1) <= Genetics.MUTATION_CHANCE:
-			thrust_sequence[index] = get_random_vector()
-		else:
 			thrust_sequence[index] = thrust_sequence[index].rotated(2*PI * Genetics.MUTATION_ANGLE * rand_range(-1,1))
 	return thrust_sequence
 
