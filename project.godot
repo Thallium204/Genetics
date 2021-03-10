@@ -28,6 +28,7 @@ config/icon="res://icon.png"
 
 Lineage="*res://_Lineage.gd"
 Genetics="*res://_Genetics.gd"
+GenePool="*res://_GenePool.gd"
 
 [display]
 

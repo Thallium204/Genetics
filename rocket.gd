@@ -17,16 +17,12 @@ func set_debug(new_value):
 
 
 func update_visuals():
-	$Name.text = genes.first_name + "\n" + genes.family_name
+	$Name.text = genes.first_name + " " + genes.family_name
 	$SpriteInner.modulate = Lineage.get_family_colors(genes.family_name)
 	$SpriteQuad.modulate = Color.blue if genes.sex == 0 else Color.pink
 
 
 func _physics_process(delta):
-	
-	var curve:Curve2D = get_parent().get_parent().curve
-	nearest_path_point = curve.get_closest_point(position)
-	update()
 	
 	delta_time += delta
 	
@@ -60,14 +56,6 @@ func thrust():
 	update()
 
 
-func _draw():
-	if not debug:
-		return
-	#draw_line(Vector2.ZERO,-applied_force.normalized() * 32,Color.red,5.0)
-	draw_line(Vector2.ZERO,nearest_path_point-position,Color.green,3.0,true)
-	draw_circle(nearest_path_point-position,10.0,Color.green)
-
-
 func _on_Rocket_body_entered(body):
 	
 	if "Goal" in body.name:
@@ -77,7 +65,7 @@ func _on_Rocket_body_entered(body):
 
 func die():
 	update_genetic_score()
-	get_parent().add_to_gene_pool(genes)
+	GenePool.add_to_gene_pool(genes)
 	queue_free()
 
 
