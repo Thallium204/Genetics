@@ -7,9 +7,8 @@ var MUTATION_CHANCE = 0.05
 var MUTATION_ANGLE = 0.01
 
 const ROCKETS: = 64
-const THRUSTS = 50
-
-var SIMUL_TIME:float = 10.0
+const THRUSTS = 100
+var SIMUL_TIME:float = 20.0
 
 var family_mode = FAMILY_FATHER
 var wives = 1

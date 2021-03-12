@@ -69,7 +69,7 @@ func get_genetic_score(rocket_position):
 	# genetic_score: 1 ~ best | 0 ~ worst
 	var _genetic_score = (pow(2,closeness_score) - 1 + pow(2,timing_score) - 1) / 2.0
 	#print(closeness_score," ",timing_score," ",genetic_score)
-	return 3 * closeness_score + (timing_score - 1) * 0
+	return 3 * closeness_score + (timing_score - 1)
 
 
 func spawn_rocket_generation():
