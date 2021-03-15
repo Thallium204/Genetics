@@ -1,15 +1,29 @@
 extends RigidBody2D
 
+const THRUST = 5000.0
+const TORQUE = 5.0
+const THRUST_MULTIPLIER = 3.0
+const FUEL_MAX = 100.0
+var fuel = FUEL_MAX setget set_fuel
+
+var input_keys = []
+
 var view_angle = 0.0
 var ray_directions = {}
 var field_of_view = 90
 var view_distance = 100.0
 var view_segments = 10
 
+func set_fuel(value):
+	fuel = clamp(value,0,FUEL_MAX)
+
+
 func _ready():
 	$Sprite/Sight.value = field_of_view
+	$FuelBar.max_value = FUEL_MAX
+	update_visuals()
+	$FuelBar.step = 0.1
 	generate_ray_directions()
-
 
 func generate_ray_directions():
 	ray_directions = {}
@@ -19,6 +33,9 @@ func generate_ray_directions():
 		var vector = Vector2( sin(angle) , cos(angle) )
 		ray_directions[vector] = {"color":Color.green, "hit_pos":Vector2()}
 
+
+func update_visuals():
+	$FuelBar.value = fuel
 
 func blink():
 	for direction in ray_directions:
@@ -30,7 +47,6 @@ func blink():
 		else:
 			data.color = Color.green
 			data.hit_pos = Vector2()
-
 
 func cast_ray(direction:Vector2):
 	#print("casting in: ",direction)
@@ -60,39 +76,60 @@ func _draw():
 
 
 func _physics_process(delta):
+	update_forces(delta)
 	update()
-
 
 func _on_Timer_timeout():
 	blink()
 
+
 func _unhandled_key_input(event):
 	
-	if event.scancode == KEY_UP:
-		if event.pressed:
-			applied_force = Vector2(+1.0,0).rotated(rotation) * 50
-		else:
-			applied_force = Vector2(0,0)
+	if event.pressed:
+		add_key(event.scancode)
+	else:
+		remove_key(event.scancode)
+
+func update_forces(delta):
 	
-	elif event.scancode == KEY_RIGHT:
-		if event.pressed:
-			angular_velocity = +1.0
-		else:
-			angular_velocity = 0.0
+	applied_force = Vector2()
+	$Particles.initial_velocity = 100
+	$Particles.emitting = false
 	
-	elif event.scancode == KEY_DOWN:
-		if event.pressed:
-			applied_force = Vector2(-1.0,0).rotated(rotation) * 50
-		else:
-			applied_force = Vector2(0,0)
+	if fuel <= 0:
+		return
+	#angular_velocity /= 1.1
+	var thrust_multiplier = 1.0
 	
-	elif event.scancode == KEY_LEFT:
-		if event.pressed:
-			angular_velocity = -1.0
-		else:
-			angular_velocity = 0.0
+	if KEY_RIGHT in input_keys:
+		angular_velocity += TORQUE * delta
 	
-	print()
-	print("applied_force = ",applied_force)
-	print("angular_velocity = ",angular_velocity)
-	print(rotation)
+	if KEY_LEFT in input_keys:
+		angular_velocity -= TORQUE * delta
+	
+	
+	if KEY_SHIFT in input_keys:
+		thrust_multiplier = THRUST_MULTIPLIER
+		#$Particles.color = Color(1,0,0,0.5)
+		$Particles.initial_velocity = 300
+	
+	if KEY_UP in input_keys:
+		$Particles.emitting = true
+		applied_force += Vector2(+1.0,0).rotated(rotation) * THRUST * thrust_multiplier * delta
+		self.fuel -= 0.5 * thrust_multiplier
+	
+	if KEY_DOWN in input_keys:
+		applied_force += Vector2(-1.0,0).rotated(rotation) * THRUST * thrust_multiplier * delta
+	
+	update_visuals()
+
+func add_key(scancode):
+	if not scancode in input_keys:
+		input_keys.append(scancode)
+
+func remove_key(scancode):
+	if scancode in input_keys:
+		input_keys.erase(scancode)
+
+
+
