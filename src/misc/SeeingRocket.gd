@@ -3,8 +3,10 @@ extends RigidBody2D
 const THRUST = 5000.0
 const TORQUE = 5.0
 const THRUST_MULTIPLIER = 3.0
-const FUEL_MAX = 100.0
-var fuel = FUEL_MAX setget set_fuel
+const REVERSE_MULTIPLIER = 0.6
+const FUEL_MAX = 300.0
+var fuel = FUEL_MAX
+const FUEL_COST = 0.1
 
 var input_keys = []
 
@@ -14,15 +16,13 @@ var field_of_view = 90
 var view_distance = 100.0
 var view_segments = 10
 
-func set_fuel(value):
-	fuel = clamp(value,0,FUEL_MAX)
-
+var network = Network.new()
 
 func _ready():
 	$Sprite/Sight.value = field_of_view
-	$FuelBar.max_value = FUEL_MAX
+	$UI/FuelBar.max_value = FUEL_MAX
 	update_visuals()
-	$FuelBar.step = 0.1
+	$UI/FuelBar.step = 0.1
 	generate_ray_directions()
 
 func generate_ray_directions():
@@ -35,11 +35,14 @@ func generate_ray_directions():
 
 
 func update_visuals():
-	$FuelBar.value = fuel
+	$UI/FuelBar.value = fuel
 
 func blink():
 	for direction in ray_directions:
 		var data = ray_directions[direction]
+		if not use_fuel(0.5):
+			data.color = Color(1,1,1,0)
+			continue
 		var result = cast_ray(direction)
 		if result:
 			data.color = Color.red
@@ -63,11 +66,8 @@ func _draw():
 		var data = ray_directions[direction]
 		var draw_vector
 		var time = $Timer.time_left / $Timer.wait_time
-		var color
-		if data.color == Color.green:
-			color = Color(0,time,0)
-		else:
-			color = Color(time,0,0)
+		var color = data.color
+		color.a = clamp(time,0,color.a)
 		if data.hit_pos == Vector2():
 			draw_vector = direction * view_distance
 		else:
@@ -77,6 +77,7 @@ func _draw():
 
 func _physics_process(delta):
 	update_forces(delta)
+	$UI.rotation = -rotation
 	update()
 
 func _on_Timer_timeout():
@@ -95,6 +96,7 @@ func update_forces(delta):
 	applied_force = Vector2()
 	$Particles.initial_velocity = 100
 	$Particles.emitting = false
+	$ParticlesTorque.emitting = false
 	
 	if fuel <= 0:
 		return
@@ -102,10 +104,16 @@ func update_forces(delta):
 	var thrust_multiplier = 1.0
 	
 	if KEY_RIGHT in input_keys:
-		angular_velocity += TORQUE * delta
+		if use_fuel():
+			angular_velocity += TORQUE * delta
+			$ParticlesTorque.direction.y = -1
+			$ParticlesTorque.emitting = true
 	
 	if KEY_LEFT in input_keys:
-		angular_velocity -= TORQUE * delta
+		if use_fuel():
+			angular_velocity -= TORQUE * delta
+			$ParticlesTorque.direction.y = +1
+			$ParticlesTorque.emitting = true
 	
 	
 	if KEY_SHIFT in input_keys:
@@ -114,12 +122,13 @@ func update_forces(delta):
 		$Particles.initial_velocity = 300
 	
 	if KEY_UP in input_keys:
-		$Particles.emitting = true
-		applied_force += Vector2(+1.0,0).rotated(rotation) * THRUST * thrust_multiplier * delta
-		self.fuel -= 0.5 * thrust_multiplier
+		if use_fuel(thrust_multiplier):
+			$Particles.emitting = true
+			applied_force += Vector2(+1.0,0).rotated(rotation) * THRUST * thrust_multiplier * delta
 	
 	if KEY_DOWN in input_keys:
-		applied_force += Vector2(-1.0,0).rotated(rotation) * THRUST * thrust_multiplier * delta
+		if use_fuel(REVERSE_MULTIPLIER):
+			applied_force += Vector2(-1.0,0).rotated(rotation) * THRUST * REVERSE_MULTIPLIER * delta
 	
 	update_visuals()
 
@@ -130,6 +139,40 @@ func add_key(scancode):
 func remove_key(scancode):
 	if scancode in input_keys:
 		input_keys.erase(scancode)
+
+
+func use_fuel(multiplier = 1.0) -> bool:
+	if fuel - (FUEL_COST * multiplier) < 0:
+		return false
+	fuel = fuel - (FUEL_COST * multiplier)
+	return true
+
+
+
+
+
+var layer_data = {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/quad.svg-0bb2223ee897a7cee0fc0b7f2fbe48d8.stex"
+path="res://.import/circle.svg-da7488c68eed8092ce14a4f9ed62666b.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/quad.svg"
-dest_files=[ "res://.import/quad.svg-0bb2223ee897a7cee0fc0b7f2fbe48d8.stex" ]
+source_file="res://assets/sprites/circle.svg"
+dest_files=[ "res://.import/circle.svg-da7488c68eed8092ce14a4f9ed62666b.stex" ]
 
 [params]
 

@@ -12,10 +12,22 @@ _global_script_classes=[ {
 "base": "Resource",
 "class": "Genes",
 "language": "GDScript",
-"path": "res://Genes.gd"
+"path": "res://src/custom/#Genes.gd"
+}, {
+"base": "Resource",
+"class": "NetNode",
+"language": "GDScript",
+"path": "res://src/custom/#NetNode.gd"
+}, {
+"base": "Resource",
+"class": "Network",
+"language": "GDScript",
+"path": "res://src/custom/#Network.gd"
 } ]
 _global_script_class_icons={
-"Genes": "res://icons/Genes.svg"
+"Genes": "res://icons/Genes.svg",
+"NetNode": "",
+"Network": ""
 }
 
 [application]
@@ -26,9 +38,9 @@ config/icon="res://icon.png"
 
 [autoload]
 
-Lineage="*res://_Lineage.gd"
-Genetics="*res://_Genetics.gd"
-GenePool="*res://_GenePool.gd"
+Lineage="*res://src/_Lineage.gd"
+Genetics="*res://src/_Genetics.gd"
+GenePool="*res://src/_GenePool.gd"
 
 [display]
 

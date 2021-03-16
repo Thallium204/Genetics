@@ -6,7 +6,7 @@ signal end_simulation
 signal toggle_debug(state)
 
 var rng = RandomNumberGenerator.new()
-var rocket_load = preload("res://Rocket.tscn")
+var rocket_load = preload("res://src/Rocket.tscn")
 
 var simul_time:float = Genetics.SIMUL_TIME # seconds
 
