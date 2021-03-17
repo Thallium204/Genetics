@@ -4,19 +4,22 @@ const THRUST = 200.0
 const TORQUE = 5.0
 const THRUST_MULTIPLIER = 3.0
 const REVERSE_MULTIPLIER = 0.6
-const FUEL_MAX = 300.0
+const FUEL_MAX = 200.0
 var fuel = FUEL_MAX
 const FUEL_COST = 0.1
 
 var input_keys = []
 
 var view_angle = 0.0
-var ray_directions = {}
 var field_of_view = 90
 var view_distance = 100.0
 var view_segments = 10
 
-var network = Network.new(2,5,4)
+var ray_dir_vectors = PoolVector2Array()
+var ray_hit_vectors = PoolVector2Array()
+var ray_colors = PoolColorArray()
+
+var network:Network
 
 func _ready():
 	$Sprite/Sight.value = field_of_view
@@ -24,32 +27,71 @@ func _ready():
 	update_visuals()
 	$UI/FuelBar.step = 0.1
 	generate_ray_directions()
+	network = Network.new( ray_colors.size() , 10 , 4 )
+	
 
 func generate_ray_directions():
-	ray_directions = {}
+	
+	ray_dir_vectors = PoolVector2Array()
+	ray_hit_vectors = PoolVector2Array()
+	ray_colors = PoolColorArray()
+	
 	var rad_per_segment = deg2rad(field_of_view) / float(view_segments)
 	for seg_index in view_segments:
 		var angle = (seg_index + 0.5) * rad_per_segment + deg2rad(field_of_view)/2
 		var vector = Vector2( sin(angle) , cos(angle) )
-		ray_directions[vector] = {"color":Color.green, "hit_pos":Vector2()}
+		ray_dir_vectors.append(vector)
+		ray_hit_vectors.append(Vector2.ZERO)
+		ray_colors.append(Color.black)
 
 
 func update_visuals():
 	$UI/FuelBar.value = fuel
 
 func blink():
-	for direction in ray_directions:
-		var data = ray_directions[direction]
+	
+	for index in ray_dir_vectors.size():
 		if not use_fuel(0.5):
-			data.color = Color(1,1,1,0)
+			ray_colors[index] = Color(1,1,1,0)
 			continue
-		var result = cast_ray(direction)
+		var result = cast_ray(ray_dir_vectors[index])
 		if result:
-			data.color = Color.red
-			data.hit_pos = (result.position - position).rotated(-rotation)
+			ray_colors[index] = Color.white
+			ray_hit_vectors[index] = (result.position - position).rotated(-rotation)
 		else:
-			data.color = Color.green
-			data.hit_pos = Vector2()
+			ray_colors[index] = Color.black
+			ray_hit_vectors[index] = Vector2()
+	
+	if use_fuel(10.0):
+		network.set_input(ray_colors)
+		think()
+
+
+func think():
+	var result = network.feed_forward()
+	
+	if result[0] >= 0.5:
+		add_key(KEY_UP)
+	else:
+		remove_key(KEY_UP)
+	
+	if result[1] >= 0.5:
+		add_key(KEY_DOWN)
+	else:
+		remove_key(KEY_DOWN)
+	
+	if result[2] >= 0.5:
+		add_key(KEY_LEFT)
+	else:
+		remove_key(KEY_LEFT)
+	
+	if result[3] >= 0.5:
+		add_key(KEY_RIGHT)
+	else:
+		remove_key(KEY_RIGHT)
+	
+	print(result)
+
 
 func cast_ray(direction:Vector2):
 	#print("casting in: ",direction)
@@ -62,16 +104,15 @@ func cast_ray(direction:Vector2):
 
 func _draw():
 	
-	for direction in ray_directions:
-		var data = ray_directions[direction]
+	for index in ray_dir_vectors.size():
 		var draw_vector
 		var time = $Timer.time_left / $Timer.wait_time
-		var color = data.color
+		var color = ray_colors[index]
 		color.a = clamp(time,0,color.a)
-		if data.hit_pos == Vector2():
-			draw_vector = direction * view_distance
+		if ray_hit_vectors[index] == Vector2():
+			draw_vector = ray_dir_vectors[index] * view_distance
 		else:
-			draw_vector = data.hit_pos
+			draw_vector = ray_hit_vectors[index]
 		draw_line(Vector2(), draw_vector, color, 1.0)
 
 

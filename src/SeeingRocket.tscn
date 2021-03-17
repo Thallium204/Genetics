@@ -91,6 +91,8 @@ autostart = true
 shape = SubResource( 4 )
 
 [node name="UI" type="Line2D" parent="."]
+z_index = 1
+z_as_relative = false
 points = PoolVector2Array( 16, -32, 16, -16, 48, -16 )
 width = 1.0
 default_color = Color( 1, 1, 1, 1 )

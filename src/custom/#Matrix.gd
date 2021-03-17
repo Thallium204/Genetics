@@ -6,7 +6,8 @@ var cols:int
 
 var array_2D = []
 
-func _init(variant, cols_value = 1, random = false):
+func _init(variant, cols_value = 1, random = false, random_size = 1.0):
+	randomize()
 	
 	if variant is int:
 	
@@ -17,7 +18,7 @@ func _init(variant, cols_value = 1, random = false):
 			array_2D.append([])
 			for c_index in cols:
 				if random:
-					array_2D[-1].append(rand_range(0,1))
+					array_2D[-1].append(random_size * rand_range(-1,1))
 				else:
 					array_2D[-1].append(0)
 	
@@ -28,17 +29,32 @@ func _init(variant, cols_value = 1, random = false):
 		cols = array_2D[0].size()
 
 
-func set_index(value, row, col = 1):
+func set_index(value, row, col = 0):
 	array_2D[row][col] = value
 
 
-func adj_index(adjust, row, col = 1):
+func adj_index(adjust, row, col = 0):
 	array_2D[row][col] += adjust
+
+
+func add(matrix:Matrix):
+	
+	if rows != matrix.rows or cols != matrix.cols:
+		push_error("MATRIX LINEAR MULT ERROR: ("+str(rows)+","+str(cols)+") x ("+str(matrix.rows)+","+str(matrix.cols)+")")
+	
+	var outcome_array_2D = []
+	
+	for row in rows:
+		outcome_array_2D.append([])
+		for col in cols:
+			outcome_array_2D[-1].append(array_2D[row][col] + matrix.array_2D[row][col])
+	
+	return outcome_array_2D
 
 
 func mult(matrix:Matrix):
 	
-	if rows != matrix.cols or cols != matrix.rows:
+	if cols != matrix.rows:
 		push_error("MATRIX MULT ERROR: ("+str(rows)+","+str(cols)+") x ("+str(matrix.rows)+","+str(matrix.cols)+")")
 	
 	var outcome_array_2D = []
@@ -54,15 +70,46 @@ func mult(matrix:Matrix):
 	return outcome_array_2D
 
 
-func p():
+func linear_mult(matrix:Matrix):
+	
+	if rows != matrix.rows or cols != matrix.cols:
+		push_error("MATRIX LINEAR MULT ERROR: ("+str(rows)+","+str(cols)+") x ("+str(matrix.rows)+","+str(matrix.cols)+")")
+	
+	var outcome_array_2D = []
+	
+	for row in rows:
+		outcome_array_2D.append([])
+		for col in cols:
+			outcome_array_2D[-1].append(array_2D[row][col] * matrix.array_2D[row][col])
+	
+	return outcome_array_2D
+
+
+func apply_sigmoid():
+	
+	for row in rows:
+		for col in cols:
+			array_2D[row][col] = 1.0 / ( 1 + exp(-array_2D[row][col]) )
+
+
+func to_array() -> Array:
+	
+	var array = []
+	for row in array_2D:
+		array.append(row[0])
+	
+	return array
+
+
+func p(print_name = ""):
+	print(print_name)
 	var print_string = ""
 	for row in array_2D:
-		print_string = "["
+		print_string = " | "
 		for value in row:
-			print_string += "%5d," % value
-		print(print_string.left(print_string.length()-1) + "]")
+			print_string += "%-6.2f" % float(value)
+		print(print_string.left(print_string.length()-2) + " |")
 
 
-var format_string = "%s was reluctant to learn %s, but now he enjoys it."
-var actual_string = format_string % ["Estragon", "GDScript"]
+
 
