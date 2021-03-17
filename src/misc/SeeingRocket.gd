@@ -1,6 +1,6 @@
 extends RigidBody2D
 
-const THRUST = 5000.0
+const THRUST = 200.0
 const TORQUE = 5.0
 const THRUST_MULTIPLIER = 3.0
 const REVERSE_MULTIPLIER = 0.6
@@ -16,7 +16,7 @@ var field_of_view = 90
 var view_distance = 100.0
 var view_segments = 10
 
-var network = Network.new()
+var network = Network.new(2,5,4)
 
 func _ready():
 	$Sprite/Sight.value = field_of_view
@@ -93,7 +93,6 @@ func _unhandled_key_input(event):
 
 func update_forces(delta):
 	
-	applied_force = Vector2()
 	$Particles.initial_velocity = 100
 	$Particles.emitting = false
 	$ParticlesTorque.emitting = false
@@ -124,11 +123,11 @@ func update_forces(delta):
 	if KEY_UP in input_keys:
 		if use_fuel(thrust_multiplier):
 			$Particles.emitting = true
-			applied_force += Vector2(+1.0,0).rotated(rotation) * THRUST * thrust_multiplier * delta
+			linear_velocity += Vector2(+1.0,0).rotated(rotation) * THRUST * thrust_multiplier * delta
 	
 	if KEY_DOWN in input_keys:
 		if use_fuel(REVERSE_MULTIPLIER):
-			applied_force += Vector2(-1.0,0).rotated(rotation) * THRUST * REVERSE_MULTIPLIER * delta
+			linear_velocity += Vector2(-1.0,0).rotated(rotation) * THRUST * REVERSE_MULTIPLIER * delta
 	
 	update_visuals()
 
@@ -146,16 +145,6 @@ func use_fuel(multiplier = 1.0) -> bool:
 		return false
 	fuel = fuel - (FUEL_COST * multiplier)
 	return true
-
-
-
-
-
-var layer_data = {}
-
-
-
-
 
 
 

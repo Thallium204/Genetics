@@ -1,32 +1,40 @@
 class_name Network
 extends Resource
 
-var input_size = 1 setget set_input_size
-var hidden_size = 1 setget set_hidden_size
-var output_size = 1 setget set_output_size
+var input_size = 1
+var hidden_size = 1
+var output_size = 1
 
-var input_layer = []
+var input_vector = []
 
 var hidden_matrix = []
-var hidden_layer = []
-var hidden_recurse = []
+var hidden_vector = []
+var hidden_r_vector = []
 
 var output_matrix = []
-var output_layer = []
+var output_vector = []
 
 
-func set_input_size(value):
-	input_size = value
-	configure_layer(input_layer,input_size)
+func _init(input:int, hidden:int, output:int):
+	
+	input_size = input
+	hidden_size = hidden
+	output_size = output
+	
+	input_vector = Matrix.new(input)
+	hidden_matrix = Matrix.new(hidden_size,input_size,true)
+	hidden_vector = Matrix.new(input)
+	hidden_r_vector = Matrix.new(hidden)
+	output_matrix = Matrix.new(output_size,hidden_size,true)
+	output_vector = Matrix.new(output)
 
-func set_hidden_size(value):
-	hidden_size = value
-	configure_layer(hidden_layer,hidden_size)
+	print_internals()
 
-func set_output_size(value):
-	output_size = value
-	configure_layer(output_layer,output_size)
-
-func configure_layer(layer,size):
-	for node in size:
-		input_layer.append(NetNode.new())
+func print_internals():
+	
+	input_vector.p()
+	hidden_matrix.p()
+	hidden_vector.p()
+	hidden_r_vector.p()
+	output_matrix.p()
+	output_vector.p()
