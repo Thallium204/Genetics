@@ -22,13 +22,13 @@ func _init():
 func import_names():
 	
 	var file = File.new()
-	file.open("last-names.json", File.READ)
+	file.open("assets/data/last-names.json", File.READ)
 	family_names = parse_json(file.get_line())
 	file.close()
-	file.open("male-names.json", File.READ)
+	file.open("assets/data/male-names.json", File.READ)
 	male_names = parse_json(file.get_line())
 	file.close()
-	file.open("female-names.json", File.READ)
+	file.open("assets/data/female-names.json", File.READ)
 	female_names = parse_json(file.get_line())
 	file.close()
 
